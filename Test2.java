@@ -7,9 +7,12 @@ import javax.swing.event.*;
 import java.sql.Connection;
 import java.util.Scanner;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Timer;
+import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 
 public class Test2 extends JFrame{
@@ -52,7 +55,7 @@ public class Test2 extends JFrame{
         p_est.add(testingLabel2);
         this.add(p_est, BorderLayout.EAST);
     }
-        private void showTextListenerDemo(){
+        public void showTextListenerDemo(){
             tA.addTextListener(new CustomTextListener());
             Button hiddenButton = new Button("hidden");
             hiddenButton.addActionListener(new ActionListener(){
@@ -71,18 +74,63 @@ public class Test2 extends JFrame{
 		class CustomTextListener implements TextListener {
 	      	public void textValueChanged(TextEvent e) {
         statusLabel.setText("Entered text: " + 			tA.getText());
-          String ici =  tA.getText();
+
+
+
+
+
+
          //if (statusLabel.getText().equals("MERCI")) {
             //testingLabel2.setText("SAME " + 			statusLabel.getText()); 
             tAContent = new StringTokenizer(tA.getText());
-            try {
+
+
+
+        String url = "jdbc:mysql://localhost/projet_java";
+        String login = "root";
+        String passwd = "";
+        Connection cn = null;
+        Statement st = null;
+        ResultSet rs = null;
+        try{
+            Class.forName("com.mysql.jdbc.Driver");
+            cn = DriverManager.getConnection(url, login, passwd);
+            st = cn.createStatement();
+            while(tAContent.hasMoreTokens()){
+              //  testingLabel.setText(" IS : "+tAContent.nextToken());
+            String sql = "SELECT renseigner FROM mot WHERE renseigner ='"+tAContent.nextToken()+"'";
+            rs = st.executeQuery(sql);
+              if(rs.next()){
+                testingLabel2.setText(tAContent.nextToken()+" Est dedans");
+            }
+            else{
+                testingLabel2.setText(tAContent.nextToken()+" est Inconnue");}
+            }
+            
+        }
+        catch(SQLException ep){
+            ep.printStackTrace();
+        }
+        catch(ClassNotFoundException ep){
+            ep.printStackTrace();
+        }
+        finally{
+            try{
+                cn.close();
+                st.close();
+            }
+            catch (SQLException ep){
+                ep.printStackTrace();
+            }
+        }
+
+        /*    try {
                 st = cn.createStatement();
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
             while(tAContent.hasMoreTokens()){
                
-                testingLabel.setText(" IS : "+tAContent.nextToken());
                 String sql = "SELECT * FROM mot where mot LIKE "+tAContent.nextToken()+"%";
                 try {
                     selectedRows = st.executeUpdate(sql);
@@ -90,22 +138,17 @@ public class Test2 extends JFrame{
                     ex.printStackTrace();
                 }
                 if (selectedRows < 1) {
-                    testingLabel2.setText("A AJOUTER");
                 }
             }
          //}           
       }
-   
+   */
     }
     
 
-    public static void main(String[] args){
-        Test2  awtListenerDemo = new Test2();  
-        awtListenerDemo.showTextListenerDemo();
-        Timer timer;
-        timer = new Timer();
-        timer.schedule(new MaTask(), 1000, 60000);
-     }
+    
 	
+}
+
 }
 
