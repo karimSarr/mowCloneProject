@@ -38,6 +38,7 @@ public class Principale extends JFrame{
 	private JPanel p_nord,p_centre, p_sud; 
 	private JTextPane jcomp1,jcomp2;
 	private JMenuBar Fichier;
+	private static String intermediaire;
 	private JLabel l_Titre;
 	public Principale() {
 		this.setTitle("CI/UGB"); 
@@ -101,6 +102,12 @@ public class Principale extends JFrame{
 		coller.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_DOWN_MASK));
       	coller.setActionCommand("Coller");
       	editMenu.add (coller);
+      	
+      	JMenuItem all = new JMenuItem ("Selectionner Tout");
+      	all.setMnemonic(KeyEvent.VK_A);
+      	all.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
+      	all.setActionCommand("all");
+      	editMenu.add (all);
       	
 
     	JMenu policeMenu = new JMenu ("Police");
@@ -215,11 +222,13 @@ public class Principale extends JFrame{
 		rougeItem.addActionListener(menuItemListener);
 		image.addActionListener(menuItemListener);
 		forme.addActionListener(menuItemListener);
+		all.addActionListener(menuItemListener);
 		
 		fileMenu.add(nouveau);
 		fileMenu.add(modifierItem);
         fileMenu.add (savMenu);
-      	editMenu.add(couper);
+		editMenu.add(all);
+		editMenu.add(couper);
 		editMenu.add(copie);
 		editMenu.add(coller);
 		editMenu.add(italic);
@@ -270,21 +279,18 @@ public class Principale extends JFrame{
           if (e.getActionCommand() == "Nouveau") {
         	  Principale P = new Principale();
           }
+          
           if (e.getActionCommand() == "Ouvrir Fichier") {
-       	   JFileChooser dialogue = new JFileChooser(new File("."));
+        	JFileChooser dialogue = new JFileChooser(new File("."));
       		PrintWriter sortie;
       		File fichier;
       		if (dialogue.showOpenDialog(null)== 
       		    JFileChooser.APPROVE_OPTION) {
       		    fichier = dialogue.getSelectedFile();
+      		    String absolutePath = fichier.getAbsolutePath();
+      		    	intermediaire=absolutePath;
       		    try {
-
-       		        JFrame frame = new JFrame ("TextView");
-       				SpellChecker.registerDictionaries(null,"fr","fr");
-       		    	frame.getContentPane().add(new Principale());
-       		        frame.pack();
-       				frame.setLocationRelativeTo(null);
-       				frame.setVisible(true);
+              	  Principale Pr = new Principale();
 					sortie = new PrintWriter
 					(new FileWriter(fichier.getPath(), true));
 			          FileReader fr=new FileReader(fichier);    
@@ -294,7 +300,8 @@ public class Principale extends JFrame{
 			        	  jcomp1.setText(jcomp1.getText()+Character.toString((char)i));
 			          }  
 			          br.close();    
-			          fr.close();    
+			          fr.close();
+			          
 					
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
@@ -303,24 +310,52 @@ public class Principale extends JFrame{
       		}
           }
           if (e.getActionCommand() == "Enregistrer"){
-         	 JFileChooser chooser = new JFileChooser();
-         	 BufferedWriter writer;
-              int returnVal = chooser.showSaveDialog(getParent());
-              if(returnVal == JFileChooser.APPROVE_OPTION)
-              {
-                  try
-                  {
-                 	 writer = new BufferedWriter(new FileWriter(chooser.getSelectedFile()));
-                      jcomp1.write(writer);
-                      writer.close();
-                  } catch (FileNotFoundException fnfe)
-                  {
-                      fnfe.printStackTrace();
-                  } catch (IOException ioe)
-                  {
-                      ioe.printStackTrace();
-                  }
-              }
+        	  File fi=new File(""+intermediaire+"");
+			if(fi.exists()){
+				FileWriter fw = null;
+				BufferedWriter bw = null; 
+				PrintWriter pw = null; 
+				try { 
+				fw = new FileWriter(intermediaire, false);
+				bw = new BufferedWriter(fw);
+				pw = new PrintWriter(bw); 
+
+				pw.println(jcomp1.getText());
+
+				pw.flush();
+				 } catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} finally { 
+				try { 
+				pw.close();
+				 bw.close();
+				 fw.close();
+				 } catch (IOException io) {// can't do anything } 
+				} 
+				}
+
+			}
+			else{
+	         	 JFileChooser chooser = new JFileChooser();
+	         	 BufferedWriter writer;
+	              int returnVal = chooser.showSaveDialog(getParent());
+	              if(returnVal == JFileChooser.APPROVE_OPTION)
+	              {
+	                  try
+	                  {
+	                 	 writer = new BufferedWriter(new FileWriter(chooser.getSelectedFile()));
+	                      jcomp1.write(writer);
+	                      writer.close();
+	                  } catch (FileNotFoundException fnfe)
+	                  {
+	                      fnfe.printStackTrace();
+	                  } catch (IOException ioe)
+	                  {
+	                      ioe.printStackTrace();
+	                  }
+	              }
+			}
           }
           if (e.getActionCommand() == "Copier") {
        	   try
@@ -417,6 +452,9 @@ public class Principale extends JFrame{
        		    
        	  }
        	  catch(Exception ex){}  	   
+          }
+         if (e.getActionCommand() == "all") {
+        	 jcomp1.selectAll();
             }
 
          if (e.getActionCommand() == "Agency FB") {
